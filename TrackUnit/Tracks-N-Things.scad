@@ -1,44 +1,59 @@
+// **********************************************************************************
+// A Simple Tracked Exploation vehicle 
+//  Author: David M. Flynn 2015
 
+// **********************************************************************************
+// **********************************************************************************
+//     For STL and 3D Printing
 
-include <CommonStuff.scad>
-Track_t=14.5;
-Track_w=51;
-SidePalteSpace=38;
-Sprocket_r=32.5;
-Sprocket_cl=304;    // axil centerline
-Spocket_sep=150;    // track seperation cl-cl
+	//Bumper();			// Print 2
+	//RollPlateSTL();	// Print 4
+	//DetectorHolder();	// Print 2
+	//EmitterHolder();	// Print 2
+	IdlerWheel();		// Half of an idler wheel, Print 8
+
+// **********************************************************************************
+//		For laser cutting (export as DXF)
+
+	//SidePlate2D(IsInner=1);	// Cut 2
+	//SidePlate2D(IsInner=0);	// Cut 2
+	//TnB_Plate2D();			// Cut 2
+
+// **********************************************************************************
+//     For viewing
+
+	//ShowAll();
+	
+	//SidePlate();
+	//translate([0,SidePalteSpace/2+3,0]) rotate([-90,0,0]) Bumper();
+
+// **********************************************************************************
+
+include <CommonStuff.scad> // Screw holes and stuff
+
+Track_t=14.5;			// Thickness of track from LynxMotion.com
+Track_w=51;  			// Width of track
+SidePalteSpace=38;		// Length of 6-32 x 1.5" threaded stand-off
+Sprocket_r=32.5;		// LynxMotion track sprocket
+Sprocket_cl=304;		// axil centerline
+Spocket_sep=150;		// track seperation cl-cl
 
 Plate_t=3;
+InsidePlate_t=6;
 	
 DriveMotor_r=17.5;
 DriveMotor_l=73;
 DriveMotorBoss_r=6;
 DriveMotorBoltCircle_r=14;
-	LED_l=7;
-	LED_r=2.5;
+LED_l=7;
+LED_r=2.5;
 
-
-	SecondIdleInset=97.5;
-	QEMount=15;
-	QEHole=22.5;
+SecondIdleInset=97.5;
+QEMount=15;
+QEHole=22.5;
 	
 Plate_h=64;
-	IdleBearing_r=4;
-
-//translate([0,SidePalteSpace/2+3,0]) rotate([-90,0,0]) 
-Bumper();
-
-//RollPlateSTL();
-
-//SidePlate();
-//SidePlate2D();
-//SidePlate2D(IsInner=0);
-//TnB_Plate2D();
- //ShowAll();
- //DetectorHolder();
-//EmitterHolder();
-//IdlerWheel();
-
+IdleBearing_r=4;
 
 hBoltHeadTorx6=3.5;
 rBoltHeadTorx6=3;
@@ -86,14 +101,14 @@ module Bumper(){
 
 
 module IdlerWheel(){
-	IW_r=33;
+	IW_r=34; // 6/20/15 increased from 32.5 to lift center of vehicle and make turning easier.
 	IW_h=15.4;
 	IW_BC_r=15.84/2;
 	
 	difference(){
 		cylinder(r=IW_r,h=IW_h,$fn=180);
 		
-		translate([0,0,2]) cylinder(r1=IW_r-3,r2=IW_r-2,h=IW_h,$fn=180);
+		translate([0,0,2]) cylinder(r1=IW_r-3.5,r2=IW_r-2,h=IW_h,$fn=180);
 		translate([0,0,-0.05]) cylinder(r=4.9,h=3,$fn=60);
 		
 		for (J=[0:3]){
