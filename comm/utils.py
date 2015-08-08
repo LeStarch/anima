@@ -11,8 +11,17 @@ import anima.logging.utils
 
 log = anima.logging.utils.logger(__name__)
 
-#def sockets():
-#    '''
+context = None
+def getContextSingleton():
+    '''
+    Creates (if necessary) and returns the single zeromq context for this process
+    @return single shared zeromq context
+    '''
+    global context
+    if context is None:
+        log.info("Creating zeromq context")
+        context = zmq.context(io_threads=anima.comm.constants.IO_THREAD_COUNT)
+    return context
 #    Get any sockets that currently exist in the system
 #    @return - list of current sockets
 #    '''
