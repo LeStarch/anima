@@ -18,11 +18,11 @@ def init():
     '''
     Initialize the python logging system. Needs to be called only once.
     '''
+    global started
     if started:
         return
     logging.basicConfig(datefmt="%Y%m%dT%H:%M:%S",level=logging.DEBUG,handlers=[logging.StreamHandler()])
     logging.info("Logging system initialized")
-    global started
     started=True
 def logger(obj):
     '''

@@ -1,3 +1,5 @@
+import threading
+
 import zmq
 
 import anima.comm.utils
@@ -34,6 +36,7 @@ class Subscriber(object):
         @param network - (optional) network to connect to
         @param channels - (optional) channels on which to receive messages
         '''
+        self.thread = threading.current_thread().ident
         context = anima.comm.utils.getContextSingleton()
         self.socket = context.socket(zmq.SUB)
         channels = [] if channels is None else channels
@@ -41,7 +44,6 @@ class Subscriber(object):
         for chan in self.chans:
             self.socket.setsockopt_string(zmq.SUBSCRIBE,chan)
         self.sub(network)
-        self.thread = threading.current_thread().ident
     def recv(self,noblock=False):
         '''
         Receive a message from any of the current set of channels used by this

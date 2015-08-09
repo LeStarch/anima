@@ -33,13 +33,13 @@ class Publisher(object):
         @param network - network to connect to
         @param channel - channel on which to send messages
         '''
+        self.thread = threading.current_thread().ident
         context = anima.comm.utils.getContextSingleton()
         self.socket = context.socket(zmq.PUB)
         self.chan = channel
         name = anima.comm.utils.getIPCName(zmq.PUB)
         log.info("Binding to "+name)
         self.socket.bind(name)
-        self.thread = threading.current_thread().ident
     def send(self,message):
         '''
         Send a message from this publisher
@@ -51,7 +51,7 @@ class Publisher(object):
         #Note: receive is currently set to copy. If not efficient enough, change this.
         try:
             self.socket.send_multipart([self.channel().encode(),message.encode()])
-            log.debug("Sent message \""+str(message)+"\" on channel \""+str(self.channel)+"\"")
+            log.debug("Sent message \""+str(message)+"\" on channel \""+str(self.channel())+"\"")
         except zmq.ZMQError as e:
             log.warning("Failed to send message")
             raise anima.comm.exceptions.CommunicationException("Send failure",e)
