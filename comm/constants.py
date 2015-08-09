@@ -1,14 +1,17 @@
 '''
-Constants for the communications module
-@author: starchmd
+Constants used within the anima-comm package.
+
+TODO: Change this into a configuration module
 '''
-IPC_SOCKETS_DIR="/tmp/anima-ipc-sockets"
-IPC_PUBLISHER_PREFIX="pub-"
+'''
+The directory used to hold all IPC sockets created by the communications module.
+'''
+IPC_SOCKETS_DIR="/tmp/anima-ipc"
 
-DEFAULT_CHANNEL="biaozhun"
+'''
+Number of IO threads to use for this process when building the zero-mq context.
 
-#Number of io threads for zero-MQ to use
+This value is implementation library specific, and should be set to 1 IO thread per GB/s 
+expected to be pushed through this module in the current process.
+'''
 IO_THREAD_COUNT=1
-
-#Directory where local sockets are created
-IPC_PATH="/tmp/anima-ipc"

@@ -1,73 +1,61 @@
-'''
-Communication utilities for setting-up connections.
-
-@author: starchmd
-'''
 import os
+import threading
+
 import zmq
 
 import anima.comm.constants
 import anima.logging.utils
+'''
+Utility methods used within the anima-comm module.
 
+Note: these functions are backing-library specific and should not be used outside this module.
+
+@author: starchmd
+'''
 log = anima.logging.utils.logger(__name__)
-
 context = None
 def getContextSingleton():
     '''
-    Creates (if necessary) and returns the single zeromq context for this process
+    Creates (if necessary) and returns the single zeromq context for this process.
+    Note: This is backing library specific, and so should not be used external to the communications
+    library.
     @return single shared zeromq context
     '''
     global context
     if context is None:
         log.info("Creating zeromq context")
-        context = zmq.context(io_threads=anima.comm.constants.IO_THREAD_COUNT)
+        context = zmq.Context(io_threads=anima.comm.constants.IO_THREAD_COUNT)
     return context
-#    Get any sockets that currently exist in the system
-#    @return - list of current sockets
-#    '''
-#    sockets = [sock for sock in os.listdir(anima.comm.constants.IPC_SOCKETS_DIR)
-#                    if sock.startswith(anima.comm.constants.IPC_PUBLISHER_PREFIX)]
-#    ret = {}
-#    for sock in sockets:
-#        ret[sock.lstrip(anima.comm.constants.IPC_PUBLISHER_PREFIX)] = os.path.join(anima.comm.constants.IPC_SOCKETS_DIR,
-#                                                                                   anima.comm.constants.IPC_PUBLISHER_PREFIX)
-#    for k,v in ret.items():
-#        log.info("Loaded socket information: {0}:{1}".format(k,v))
-#    return ret
-def connection(pid=os.getpid()):
+def getIPCName(type):
     '''
-    Sets up a publisher connection for the current process
-    @param pid - (optional) process identification
-    @return - connection
+    Gets the name of the IPC socket for the given type, process, and thread.
+    The IPC socket is specific to thread, and process. It is of the form:
+    
+    <type>-<thread-id>-<process id>
+    
+    Note: This function is specific for zero-mq IPC sockets, and should not be
+    used external to this module.    
+    @param type - type of the ipc
     '''
-    location="{0}://{1}".format("ipc",os.path.join(anima.comm.constants.IPC_SOCKETS_DIR,
-                                            anima.comm.constants.IPC_PUBLISHER_PREFIX+
-                                            str(pid)))
-    context = zmq.Context.instance()
-    sock = context.socket(zmq.PUB)
-    sock.connect(location)
-    log.info("Connected to publisher socket: {0}".format(location))
-    return sock
-def channel(pid=os.getpid(),channel=anima.comm.constants.DEFAULT_CHANNEL):
+    return "ipc://"+os.path.join(anima.comm.constants.IPC_SOCKETS_DIR,str(type)+"-"+str(threading.current_thread().ident)+"-"+str(os.getpid()))
+def getIPCNamesByType(type):
     '''
-    Returns the default channel
-    @param pid - (optional) process identification
-    @param channel - (optional) partial name of channel
-    @return - full name of channel
+    Gets all the local ipc sockets by type.
+    Note: This function is specific for zero-mq IPC sockets, and should not be
+    used external to this module.
+    @param type - type to filter by
     '''
-    return "{0}-{1}".format(pid,channel)
-def binding(channel=channel()):
+    ret = []
+    for listing in os.listdir(anima.comm.constants.IPC_SOCKETS_DIR):
+        if listing.startswith(str(type)):
+            ret.append("ipc://"+os.path.join(anima.comm.constants.IPC_SOCKETS_DIR,listing))
+    return ret
+def checkThread(thread):
     '''
-    Get a binding to a channel
-    @param channel - (optional) name of channel to connect to
-    @return - socket connection
+    Checks if the given thread is the current thread
+    Note: ThreadingException is module-specific
+    @param thread - thread identifier to check
+    @throws ThreadingException on thread miss-match
     '''
-    location="{0}://{1}".format("ipc",os.path.join(anima.comm.constants.IPC_SOCKETS_DIR,
-                                            anima.comm.constants.IPC_PUBLISHER_PREFIX+
-                                            channel.split("-")[0]))
-    context = zmq.Context.instance()
-    sock = context.socket(zmq.SUB)
-    sock.setsockopt_string(zmq.SUBSCRIBE,channel)
-    sock.bind(location)
-    log.info("Bound to subscriber socket: {0} on channel {1}".format(location,channel))
-    return sock
+    if thread != threading.current_thread().ident:
+        raise anima.comm.exceptions.ThreadingException("Threading miss-match")
