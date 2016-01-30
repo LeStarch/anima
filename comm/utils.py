@@ -50,6 +50,15 @@ def getIPCNamesByType(type):
         if listing.startswith(str(type)):
             ret.append("ipc://"+os.path.join(anima.comm.constants.IPC_SOCKETS_DIR,listing))
     return ret
+def getTCPName(port):
+    '''
+    Gets the name of the TCP socket for the given port.
+    
+    Note: This function is specific for zero-mq TPC sockets, and should not be
+    used external to this module.    
+    @param port - port number to bind to
+    '''
+    return "tcp://*:"+str(port)
 def checkThread(thread):
     '''
     Checks if the given thread is the current thread
